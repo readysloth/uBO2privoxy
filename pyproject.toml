@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "ubo2privoxy"
+version = "0.1.0"
+description = "Converts uBlockOrigin filters to privoxy actions"
+authors = ["readysloth <readysloth@protonmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
