@@ -26,6 +26,6 @@ try:
 finally:
     [file.close() for file in filter_files]
 
-print(r'+block{UBO2Privoxy}')
+print(r'{+block{UBO2Privoxy}}')
 for rule in get_privoxy_rules():
     print(str(rule))
