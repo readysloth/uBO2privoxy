@@ -51,4 +51,5 @@ def get_privoxy_rules():
 def create_parser(**kwargs):
     return Lark(ADBLOCK_GRAMMAR,
                 transformer=ADB_TREE_TRANSFORMER,
-                parser='lalr')
+                parser='lalr',
+                **kwargs)
