@@ -1,3 +1,5 @@
+import re
+
 from .grammar import ADBLOCK_GRAMMAR
 
 from lark import Lark, Transformer
@@ -12,7 +14,7 @@ class Rule:
     def __str__(self):
         if self.match_domain and '/' not in self.pattern:
             return f'.{self.pattern}.'
-        return self.pattern
+        return re.escape(self.pattern).replace(r'\.', '.').replace(r'\*', '.*')
 
     def __bool__(self):
         return bool(self.pattern)
