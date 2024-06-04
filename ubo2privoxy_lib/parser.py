@@ -10,11 +10,21 @@ class Rule:
         self.pattern = ''
         self.block = True
         self.match_domain = False
+        self.regex_body = False
 
     def __str__(self):
+        output_str = self.pattern
         if self.match_domain and '/' not in self.pattern:
-            return f'.{self.pattern}.'
-        return re.escape(self.pattern).replace(r'\.', '.').replace(r'\*', '.*')
+            if output_str[0] != '.':
+                output_str = f'.{output_str}'
+            if output_str[-1] != '.':
+                output_str = f'{output_str}.'
+            return output_str
+        if self.regex_body:
+            return output_str
+        if output_str[-1] == '/':
+            output_str = output_str[:-1]
+        return output_str.replace('?', r'\?').replace(r'\*', '.*')
 
     def __bool__(self):
         return bool(self.pattern)
@@ -29,6 +39,11 @@ class ADBTree(Transformer):
     def filter_line(self, tok):
         self.rules.append(Rule())
         return tok
+
+    def REGEX_BODY(self, item):
+        self.rules[-1].pattern = str(item).strip()
+        self.rules[-1].regex_body = True
+        return item
 
     def MATCH_DOMAIN(self, item):
         self.rules[-1].match_domain = True
