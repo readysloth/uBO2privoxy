@@ -9,6 +9,10 @@ from ubo2privoxy_lib import create_parser, get_privoxy_rules
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument(
+    '-d', '--debug',
+    action='store_true',
+    help='Dump AST')
+argparser.add_argument(
     'filter_files',
     default='-',
     nargs='*',
@@ -24,7 +28,9 @@ parser = create_parser()
 
 try:
     for file in filter_files:
-        parser.parse(file.read())
+        AST = parser.parse(file.read())
+        if args.debug:
+            print(AST)
 finally:
     [file.close() for file in filter_files]
 
