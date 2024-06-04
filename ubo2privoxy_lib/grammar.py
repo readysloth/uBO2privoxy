@@ -10,7 +10,7 @@ REGEX_BODY: /(\\\/|[^\/])+/
 ELEM_HIDING_MARK: /#.?#/
 ELEM_HIDING: ELEM_HIDING_MARK /[^\r\n]*/
 FILTER_OPT: /[^,\s]*/
-VALID_URL: /[-a-zA-Z0-9@:%._\+~#=\/*?&]+/
+VALID_URL: /[-a-zA-Z0-9@:%._\+~#=\/*?&;]+/
 BLOCKING_PATTERN: VALID_URL
 FILTER_OPTS: FILTER_OPT_START (FILTER_OPT ","?)*
 
@@ -18,7 +18,7 @@ SKIP_PATTERNS: ELEM_HIDING_MARK | /^~/
 SKIP: /[^\n]*/ SKIP_PATTERNS /[^\n]*/
 COMMENT: "!" /[^\n]*/
 _EOL: /[\t ]*\r?\n/
-_NEWLINE.9999: ( _EOL | COMMENT )+
+_NEWLINE.9999: ( _EOL | COMMENT | SKIP)+
 
 regex: REGEX_MARK REGEX_BODY REGEX_MARK
 blocking_pattern: regex
