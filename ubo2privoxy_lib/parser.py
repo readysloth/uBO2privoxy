@@ -11,9 +11,15 @@ class Rule:
         self.block = True
         self.match_domain = False
         self.regex_body = False
+        self.exception = False
 
     def __str__(self):
         output_str = self.pattern
+
+        if self.exception:
+            exception_start = r'{-block{exception}}'
+            exception_end = r'{+block{exception_end}}'
+            output_str = f'{exception_start}\n{output_str}\n{exception_end}'
         if self.match_domain and '/' not in self.pattern:
             if output_str[0] != '.':
                 output_str = f'.{output_str}'
@@ -39,6 +45,10 @@ class ADBTree(Transformer):
     def filter_line(self, tok):
         self.rules.append(Rule())
         return tok
+
+    def EXCEPTION(self, item):
+        self.rules[-1].exception = True
+        return item
 
     def REGEX_BODY(self, item):
         self.rules[-1].pattern = str(item).strip()
