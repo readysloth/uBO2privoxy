@@ -10,7 +10,7 @@ REGEX_BODY: /(\\\/|[^\/])+/
 ELEM_HIDING_MARK: /#.?#/
 ELEM_HIDING: ELEM_HIDING_MARK /[^\r\n]*/
 FILTER_OPT: /[^,\s]*/
-VALID_URL: /[-a-zA-Z0-9@:%._\+~#=\/*?&;()]+/
+VALID_URL: /[-a-zA-Z0-9@:%._\+~#=\/*?&;(),]+/
 BLOCKING_PATTERN.-1000: VALID_URL
 FILTER_OPTS: FILTER_OPT_START (FILTER_OPT ","?)*
 
