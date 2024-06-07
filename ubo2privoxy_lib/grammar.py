@@ -22,7 +22,7 @@ EXT_ANCHOR: /(#@?(?:\$\?|\$|%|\?)?#).{1,2}/
 FILTER_OPT: NET_ANCHOR /.*/
 PLAIN_GENERIC_COSMETIC: /#.?#/ REST_OF_LINE
 
-DOMAIN: /[0-9a-zA-Z_.]+/
+DOMAIN: /[0-9a-zA-Z_.\-]+/
 PATH: /[^~|$][0-9a-zA-Z%&,\-.\/:;=?_~]*/
 TEMPLATE_PATH: /[^~|$][0-9a-zA-Z%&,\-.\/:;=?_~*]*/
 PROTOCOL: /https?/
