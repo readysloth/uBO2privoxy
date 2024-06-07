@@ -1,6 +1,6 @@
 import re
 
-from .grammar import ADBLOCK_GRAMMAR
+from .grammar import UBO_GRAMMAR
 
 from lark import Lark, Transformer
 
@@ -76,7 +76,7 @@ def get_privoxy_rules():
 
 
 def create_parser(**kwargs):
-    return Lark(ADBLOCK_GRAMMAR,
+    return Lark(UBO_GRAMMAR,
                 transformer=ADB_TREE_TRANSFORMER,
                 parser='lalr',
                 **kwargs)
