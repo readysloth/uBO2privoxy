@@ -4,7 +4,6 @@ COMMENT_LINE: /(?:!|#\s|####|\[adblock).*/i
 INLINE_COMMENT: /(?:\s+#).*?$/
 NEWLINE: /[\r\n]/
 IGNORE: (COMMENT_LINE | INLINE_COMMENT)? NEWLINE
-%ignore IGNORE
 
 NOT: "~"
 ANCHOR: "|"
