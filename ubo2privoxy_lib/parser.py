@@ -67,9 +67,9 @@ class ADBTree(Transformer):
         self.current_obj.contents += r'[^a-zA-Z0-9_.%-]'
         return item
 
-    # Not yet implemented
     def FILTER_OPT(self, item):
-        if str(item):
+        third_party = str(item) == '$third-party' or str(item) == '$3p'
+        if str(item) and not third_party:
             self.current_obj.not_supported = True
         return item
 
