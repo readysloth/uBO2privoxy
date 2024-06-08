@@ -3,6 +3,7 @@
 import sys
 import argparse
 
+from pprint import pprint
 
 from ubo2privoxy_lib import create_parser, get_privoxy_rules
 
@@ -30,7 +31,7 @@ try:
     for file in filter_files:
         AST = parser.parse(file.read())
         if args.debug:
-            print(AST)
+            pprint(AST.children)
 finally:
     [file.close() for file in filter_files]
 
