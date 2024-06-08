@@ -1,5 +1,3 @@
-import re
-
 from .grammar import UBO_GRAMMAR
 
 from lark import Lark, Transformer
@@ -7,64 +5,87 @@ from lark import Lark, Transformer
 
 class Rule:
     def __init__(self):
-        self.pattern = ''
         self.block = True
-        self.match_domain = False
-        self.regex_body = False
+        self.contents = ''
+        self.is_comment = False
+        self.is_domain = False
+        self.can_be_in_hosts = False
         self.exception = False
+        self.possibly_chains = False
+
+        self.not_supported = False
 
     def __str__(self):
-        output_str = self.pattern
-
-        if self.exception:
-            exception_start = r'{-block{exception}}'
-            exception_end = r'{+block{exception_end}}'
-            output_str = f'{exception_start}\n{output_str}\n{exception_end}'
-        if self.match_domain and '/' not in self.pattern:
-            if output_str[0] != '.':
-                output_str = f'.{output_str}'
-            if output_str[-1] != '.':
-                output_str = f'{output_str}.'
-            return output_str
-        if self.regex_body:
-            return output_str
-        if output_str[-1] == '/':
-            output_str = output_str[:-1]
-        return output_str.replace('?', r'\?').replace(r'\*', '.*')
+        if self.is_domain:
+            return self.contents
+        return self.contents.replace('*', '.*')
 
     def __bool__(self):
-        return bool(self.pattern)
+        return bool(self.contents)
 
 
 class ADBTree(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.rules = [Rule()]
+        self.current_obj = self.rules[-1]
 
-    def filter_line(self, tok):
+    def ubo_rule(self, item):
         self.rules.append(Rule())
-        return tok
+        self.current_obj = self.rules[-1]
+        return item
 
     def EXCEPTION(self, item):
-        self.rules[-1].exception = True
+        self.current_obj.exception = True
         return item
 
-    def REGEX_BODY(self, item):
-        self.rules[-1].pattern = str(item).strip()
-        self.rules[-1].regex_body = True
+    def IGNORE(self, item):
+        if str(item) == '\n':
+            return item
+        ignore_escape = str(item).replace("\n", "# \n").strip()
+        self.current_obj.contents = f'# {ignore_escape}'
+        self.rules.append(Rule())
+        self.current_obj = self.rules[-1]
         return item
 
-    def MATCH_DOMAIN(self, item):
-        self.rules[-1].match_domain = True
+    def DOMAIN_ANCHOR(self, item):
+        self.current_obj.is_domain = True
         return item
 
-    def BLOCKING_PATTERN(self, item):
-        self.rules[-1].pattern += str(item).strip()
+    def PATH(self, item):
+        item_str = str(item)
+        self.current_obj.is_domain = any(c not in item_str for c in '/*?')
+        if self.current_obj.is_domain:
+            self.current_obj.can_be_in_hosts = True
+        self.current_obj.contents = item_str
         return item
 
-    def SEPARATOR(self, item):
-        self.rules[-1].pattern += '/'
+    DOMAIN = PATH
+
+    def SEPARATOR_PLACEHOLDER(self, item):
+        self.current_obj.possibly_chains = True
+        self.current_obj.contents += r'[^a-zA-Z0-9_.%-]'
+        return item
+
+    # Not yet implemented
+    def FILTER_OPT(self, item):
+        if str(item):
+            self.current_obj.not_supported = True
+        return item
+
+    # Not yet implemented
+    def PLAIN_GENERIC_COSMETIC(self, item):
+        self.current_obj.not_supported = True
+        return item
+
+    def cosmetic(self, item):
+        if item[0].type == 'PLAIN_GENERIC_COSMETIC':
+            self.rules[-2].not_supported = True
+        return item
+
+    def hosts(self, item):
+        self.current_obj.can_be_in_hosts = True
+        self.current_obj.contents = str(item)
         return item
 
 
