@@ -39,9 +39,16 @@ print(r'{+block{UBO2Privoxy}}')
 for rule in get_privoxy_rules():
     if rule.not_supported:
         continue
+
+    privoxy_line = str(rule)
+    # optimization for domains
+    if privoxy_line.endswith('[^a-zA-Z0-9_.%-]'):
+        privoxy_line = privoxy_line.rstrip('[^a-zA-Z0-9_.%-]')
+    if len(privoxy_line) < 8 or privoxy_line.startswith('http'):
+        continue
     if rule.exception:
         print(r'{-block{UBO2Privoxy exception}}')
-        print(str(rule))
+        print(privoxy_line)
         print(r'{+block{UBO2Privoxy}}')
         continue
-    print(str(rule))
+    print(privoxy_line)
