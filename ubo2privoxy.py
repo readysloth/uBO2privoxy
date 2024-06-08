@@ -37,4 +37,6 @@ finally:
 
 print(r'{+block{UBO2Privoxy}}')
 for rule in get_privoxy_rules():
+    if rule.not_supported:
+        continue
     print(str(rule))
