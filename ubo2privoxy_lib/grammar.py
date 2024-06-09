@@ -1,39 +1,43 @@
-ADBLOCK_GRAMMAR = r'''
+UBO_GRAMMAR = r'''
+
+COMMENT_LINE: /(!|#\s|####|\[adblock).*/i
+INLINE_COMMENT: /(\s+#).*?$/
+NEWLINE: /[\r\n]/
+COND_IF: /!#if/
+COND_ENDIF: /!#endif/
+IGNORE: (COMMENT_LINE | INLINE_COMMENT)? NEWLINE
+      | COND_IF /[^!]+/ COND_ENDIF NEWLINE
+
+NOT: "~"
 ANCHOR: "|"
+DOMAIN_ANCHOR: "||"
 EXCEPTION: "@@"
-FILTER_OPT_START: "$"
-SEPARATOR: "^"
-MATCH_DOMAIN: "||"
-REGEX_MARK: "/"
+SEPARATOR_PLACEHOLDER: "^"
 
-REGEX_BODY: /(\\\/|[^\/])+/
-ELEM_HIDING_MARK: /#.?#/
-ELEM_HIDING: ELEM_HIDING_MARK /[^\r\n]*/
-FILTER_OPT: /[^,\s]*/
-VALID_URL: /[-a-zA-Z0-9@:%._\+~#=\/*?&;(),]+/
-BLOCKING_PATTERN.-1000: VALID_URL
-FILTER_OPTS: FILTER_OPT_START (FILTER_OPT ","?)*
+// Not accurate, but filters are not yet supported
+NET_ANCHOR: "$" | "#$"
+LOCALHOST: "127.0.0.1" | "localhost" | "local"
+THISHOST: "0.0.0.0" | "broadcasthost"
 
-SKIP_PATTERNS: ELEM_HIDING_MARK | /^~/
-SKIP: /[^\n]*/ SKIP_PATTERNS /[^\n]*/
-COMMENT: "!" /[^\n]*/
-_EOL: /[\t ]*\r?\n/
-_NEWLINE: ( _EOL | COMMENT | SKIP)+
+REST_OF_LINE: /[^\r\n]+/
+EXT_ANCHOR: /(#@?(\$\?|\$|%|\?)?#).{1,2}/
+FILTER_OPT: NET_ANCHOR /.*/
+PLAIN_GENERIC_COSMETIC: /#.?#/ REST_OF_LINE
 
-regex: REGEX_MARK REGEX_BODY REGEX_MARK
-blocking_pattern: regex
-                | SEPARATOR? (BLOCKING_PATTERN SEPARATOR?)+
-rule_opt: (ANCHOR | EXCEPTION | MATCH_DOMAIN)~0..2
-filter_line: _NEWLINE
-           | rule_opt? FILTER_OPTS
-           | rule_opt? blocking_pattern FILTER_OPTS?
-filter_file: filter_line*
+DOMAIN: /[0-9a-zA-Z_.\-*]+/
+PATH: /([^@^#~|$][0-9a-zA-Z%&,\-.\/:;=?_~*@]*)(?!.*##)/
+PROTOCOL: /https?/
+PROTOCOL_SEPARATOR: "://"
 
-?start: filter_file
+hosts: (LOCALHOST | THISHOST) " " PATH
+url: ANCHOR? SEPARATOR_PLACEHOLDER? PATH SEPARATOR_PLACEHOLDER? ANCHOR? FILTER_OPT?
+path_rule: DOMAIN_ANCHOR PATH SEPARATOR_PLACEHOLDER? ANCHOR? FILTER_OPT?
+         | (PROTOCOL? PROTOCOL_SEPARATOR)? url
+         | FILTER_OPT
+cosmetic: (NOT? DOMAIN ","?)* PLAIN_GENERIC_COSMETIC
 
-%ignore COMMENT
-%ignore _NEWLINE
-%ignore _EOL
-%ignore ANCHOR
-%ignore SKIP
+ubo_rule: hosts
+        | cosmetic
+        | path_rule
+start: (EXCEPTION? ubo_rule | IGNORE)*
 '''

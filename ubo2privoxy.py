@@ -3,6 +3,7 @@
 import sys
 import argparse
 
+from pprint import pformat
 
 from ubo2privoxy_lib import create_parser, get_privoxy_rules
 
@@ -30,10 +31,24 @@ try:
     for file in filter_files:
         AST = parser.parse(file.read())
         if args.debug:
-            print(AST)
+            print(pformat(AST.children, indent=2), file=sys.stderr)
 finally:
     [file.close() for file in filter_files]
 
 print(r'{+block{UBO2Privoxy}}')
 for rule in get_privoxy_rules():
-    print(str(rule))
+    if rule.not_supported:
+        continue
+
+    privoxy_line = str(rule)
+    # optimization for domains
+    if privoxy_line.endswith('[^a-zA-Z0-9_.%-]'):
+        privoxy_line = privoxy_line.rstrip('[^a-zA-Z0-9_.%-]')
+    if len(privoxy_line) < 8 or privoxy_line.startswith('http'):
+        continue
+    if rule.exception:
+        print(r'{-block{UBO2Privoxy exception}}')
+        print(privoxy_line)
+        print(r'{+block{UBO2Privoxy}}')
+        continue
+    print(privoxy_line)
